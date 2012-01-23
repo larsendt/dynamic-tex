@@ -7,7 +7,8 @@ TARGET =
 DEPENDPATH += . src
 INCLUDEPATH += .
 CONFIG -= qt
-unix:LIBS += -lsfml-graphics -lsfml-window -lsfml-system
+CONFIG += debug
+unix:LIBS += -lsfml-graphics -lsfml-audio -lsfml-window -lsfml-system -lGLEW -lGLU
 
 OBJECTS_DIR = obj
 

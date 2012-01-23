@@ -1,6 +1,11 @@
 #ifndef SHADER_H
 #define SHADER_H
 
+#define USE_GLEW
+#ifdef USE_GLEW
+#include <GL/glew.h>
+#endif
+
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <string>
@@ -8,7 +13,7 @@
 class Shader
 {
     public:
-        Shader(std::string vert_path, std::string frag_path);
+        Shader(char* vert_path, char* frag_path);
         void bind();
         void release();
         
@@ -23,9 +28,9 @@ class Shader
         void setUniform4i(char* name, int v1, int v2, int v3, int v4);
 
     protected:
-        GLuint compileShader(GLEnum shader_type, std::string file_path);
-        GLuint compileProgram(GLuint vert_handle, GLuint frag_handle);
-        void printShaderLog(GLuint shader_handle, std::string shader_path);
+        GLuint compileShader(GLenum shader_type, char* file_path);
+        GLuint linkProgram(GLuint vert_handle, GLuint frag_handle);
+        void printShaderLog(GLuint shader_handle, char* shader_path);
         void printProgramLog(GLuint program_handle);
         
     private:

@@ -3,11 +3,6 @@
 
 #include <string>
 
-void print(const char* s);
-void print(std::string s);
-void print(int i);
-void print(float f);
-void print(bool b);
-std::string readFile(std::string filename);
+std::string readFile(const std::string& filename);
 
 #endif
