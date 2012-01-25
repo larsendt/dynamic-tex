@@ -2,9 +2,9 @@ uniform sampler2D texture;
 varying vec2 light_pos;
 
 const int NUM_SAMPLES = 100;
-const float Density = 1.3;
+const float Density = 1.0;
 const float Weight = 0.06;
-const float Decay = 0.975;
+const float Decay = 0.98;
 const float Exposure = 0.6;
 
 void main()

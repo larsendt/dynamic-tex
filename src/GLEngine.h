@@ -9,6 +9,7 @@
 #include <SFML/Window.hpp>
 #include "Shader.h"
 #include "FrameBuffer.h"
+#include "Light.h"
 
 class GLEngine
 {
@@ -23,8 +24,10 @@ class GLEngine
 	private:
 		sf::Window* m_window;
 		sf::Clock* m_clock;
+		Light* m_light;
 		Shader* m_texShader;
 		Shader* m_gRayShader;
+		Shader* m_lightingShader;
 		FrameBuffer* m_texFrameBuffer;
 		FrameBuffer* m_gRayFrameBuffer;
 		float m_updateRate;

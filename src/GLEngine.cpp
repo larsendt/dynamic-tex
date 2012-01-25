@@ -10,17 +10,17 @@ GLEngine::GLEngine(int argc, char** argv)
 	m_fullScreen = false;
 	m_sphere = true;
 	m_godRays = true;
-	m_screenWidth = 1300;
-	m_screenHeight = 750;
 	m_updateRate = 1.0/60.0;
 	m_scale = 1.0;
 	initGL(argc, argv);
-	resize(m_screenWidth, m_screenHeight);
 }
 
 void GLEngine::initGL(int argc, char** argv)
 {
-    m_window = new sf::Window(sf::VideoMode(m_screenWidth, m_screenHeight, 32), "GLEngine");
+    //m_window = new sf::Window(sf::VideoMode::GetDesktopMode(), "GLEngine", sf::Style::Fullscreen);
+    m_window = new sf::Window(sf::VideoMode(800, 600), "GLEngine", sf::Style::Resize | sf::Style::Close); 
+    m_screenWidth = m_window->GetWidth();
+    m_screenHeight = m_window->GetHeight();
 	m_clock = new sf::Clock();
 	
 #ifdef USE_GLEW
@@ -34,12 +34,22 @@ void GLEngine::initGL(int argc, char** argv)
 	glClearColor(0.0, 0.0, 0.0, 1.0);
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glEnable(GL_NORMALIZE);
+    glEnable(GL_LIGHTING);
+    glEnable(GL_COLOR_MATERIAL);
+    glEnable(GL_LIGHT0);
+
+    m_light = new Light();
 
 	m_texShader = new Shader("shaders/warping.vert", "shaders/sphere_warping.frag");
 	m_gRayShader = new Shader("shaders/god_rays.vert", "shaders/god_rays.frag");
+	m_lightingShader = new Shader("shaders/pixel_lighting.vert", "shaders/pixel_lighting.frag");
 	
 	m_texFrameBuffer = new FrameBuffer(m_screenWidth, m_screenHeight);
 	m_gRayFrameBuffer = new FrameBuffer(m_screenWidth, m_screenHeight);
+	
+	resize(m_screenWidth, m_screenHeight);
 }
 
 int GLEngine::begin()
@@ -136,7 +146,11 @@ void GLEngine::drawScene()
 	    m_gRayFrameBuffer->bind();
 	    
 	    glPushMatrix();
+	    
+	    m_light->enlighten();
+	    
 	    //glTranslatef(0.0, 0.0, -4.0);
+	    
 	    glRotatef(m_mouseRotX, 1, 0, 0);
 	    glRotatef(m_mouseRotY, 0, 1, 0);
 	    glScalef(m_scale, m_scale, m_scale);
@@ -144,20 +158,27 @@ void GLEngine::drawScene()
 		gluQuadricDrawStyle(sphere, GLU_FILL);
 		gluQuadricTexture(sphere, GL_TRUE);
 		gluQuadricNormals(sphere, GLU_SMOOTH);
+		glColor3f(1.0, 1.0, 1.0);
  		gluSphere(sphere, 0.5, 50, 50);
  		
+	    m_lightingShader->bind();
+ 		
         glBindTexture(GL_TEXTURE_2D, 0);
- 		glTranslatef(1.0, -1.0, 0.0);
+ 		glTranslatef(0.8, 0.0, 0.0);
 		gluQuadricDrawStyle(sphere, GLU_FILL);
 		gluQuadricTexture(sphere, GL_FALSE);
 		gluQuadricNormals(sphere, GLU_SMOOTH);
+		glColor3f(0.05, 0.05, 0.05);
  		gluSphere(sphere, 0.05, 50, 50);
  		glPopMatrix();
+ 		
+ 		m_lightingShader->release();
  		
  		m_gRayFrameBuffer->release();
  		glBindTexture(GL_TEXTURE_2D, m_gRayFrameBuffer->texture());
  		
  		if(m_godRays) m_gRayShader->bind();
+ 		glColor3f(1.0, 1.0, 1.0);
         glBegin(GL_POLYGON);
         glTexCoord2f(0, 0); glVertex3f(-m_width, -1, 0);
         glTexCoord2f(1, 0); glVertex3f(m_width, -1, 0);
@@ -212,7 +233,7 @@ void GLEngine::resize(int width, int height)
 	glViewport(0, 0, width, height);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	//gluPerspective(90, m_width, 0.5, 20.0);
+	//gluPerspective(45, m_width, 0.5, 20.0);
 	glOrtho(-m_width, m_width, -1.0, 1.0, -1.0, 1.0);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
