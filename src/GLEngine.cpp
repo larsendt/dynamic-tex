@@ -19,7 +19,7 @@ GLEngine::GLEngine(int argc, char** argv)
 void GLEngine::initGL(int argc, char** argv)
 {
     //m_window = new sf::Window(sf::VideoMode::GetDesktopMode(), "GLEngine", sf::Style::Fullscreen);
-    m_window = new sf::Window(sf::VideoMode(800, 600), "GLEngine", sf::Style::Resize | sf::Style::Close); 
+    m_window = new sf::Window(sf::VideoMode(1300, 700), "GLEngine", sf::Style::Resize | sf::Style::Close); 
     m_screenWidth = m_window->GetWidth();
     m_screenHeight = m_window->GetHeight();
 	m_clock = new sf::Clock();
@@ -263,7 +263,7 @@ void GLEngine::resize(int width, int height)
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	//gluPerspective(45, m_width, 0.5, 20.0);
-	glOrtho(-m_width, m_width, -1.0, 1.0, -1.0, 1.0);
+	glOrtho(-m_width, m_width, -1.0, 1.0, -10.0, 10.0);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	
