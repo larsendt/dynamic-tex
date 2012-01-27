@@ -51,6 +51,11 @@ void GLEngine::initGL(int argc, char** argv)
 	m_texFrameBuffer = new FrameBuffer(m_screenWidth, m_screenHeight);
 	m_gRayFrameBuffer = new FrameBuffer(m_screenWidth, m_screenHeight);
 	
+	m_mouseRotX = 0;
+	m_mouseRotY = 0;
+	m_mouseLastX = 0;
+	m_mouseLastY = 0;
+	
 	resize(m_screenWidth, m_screenHeight);
 }
 

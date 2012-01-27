@@ -142,7 +142,7 @@ vec4 getColor(vec2 p)
 	float n = fbm(p + 4.0*r);
 	
 	vec4 color1 = vec4(1.0, 1.0, 1.0, 1.0);
-	vec4 color2 = vec4(1.0, 0.7, 0.1, 1.0);
+	vec4 color2 = vec4(1.0, 0.4, 0.0, 1.0);
 	vec4 color3 = vec4(1.0, 1.0, 1.0, 1.0);
 	
 	vec4 pcolor = color1*7.0;
