@@ -10,6 +10,7 @@ GLEngine::GLEngine(int argc, char** argv)
 	m_fullScreen = false;
 	m_sphere = true;
 	m_godRays = true;
+	m_color = true;
 	m_updateRate = 1.0/60.0;
 	m_scale = 1.0;
 	initGL(argc, argv);
@@ -42,7 +43,8 @@ void GLEngine::initGL(int argc, char** argv)
 
     m_light = new Light();
 
-	m_texShader = new Shader("shaders/warping.vert", "shaders/sphere_warping.frag");
+	m_blueTexShader = new Shader("shaders/warping.vert", "shaders/sphere_warping_blue.frag");
+	m_goldTexShader = new Shader("shaders/warping.vert", "shaders/sphere_warping_gold.frag");
 	m_gRayShader = new Shader("shaders/god_rays.vert", "shaders/god_rays.frag");
 	m_lightingShader = new Shader("shaders/pixel_lighting.vert", "shaders/pixel_lighting.frag");
 	
@@ -100,6 +102,9 @@ int GLEngine::begin()
                     case sf::Key::G:
                         m_godRays = !m_godRays;
                         break;
+                    case sf::Key::C:
+                        m_color = !m_color;
+                        break;
                     default:
                         break;
 			    }
@@ -124,9 +129,20 @@ void GLEngine::drawScene()
 	glLoadIdentity();
 	
 	m_texFrameBuffer->bind();
-    m_texShader->bind();
-    m_texShader->setUniform1f("screen", m_width);
-    m_texShader->setUniform1f("time", m_time);
+	
+	if(m_color)
+	{
+        m_goldTexShader->bind();
+        m_goldTexShader->setUniform1f("screen", m_width);
+        m_goldTexShader->setUniform1f("time", m_time);
+    }
+    else
+    {
+        m_blueTexShader->bind();
+        m_blueTexShader->setUniform1f("screen", m_width);
+        m_blueTexShader->setUniform1f("time", m_time);
+    }
+        
         
     glBegin(GL_POLYGON);
     glVertex3f(-m_width, -1, 0);
@@ -135,7 +151,15 @@ void GLEngine::drawScene()
     glVertex3f(-m_width, 1, 0);
     glEnd();
     
-    m_texShader->release();
+    if(m_color)
+    {
+        m_goldTexShader->release();
+    }
+    else
+    {
+        m_blueTexShader->release();
+    }
+    
     m_texFrameBuffer->release();
     m_texture = m_texFrameBuffer->texture();
     
@@ -161,7 +185,7 @@ void GLEngine::drawScene()
 		glColor3f(1.0, 1.0, 1.0);
  		gluSphere(sphere, 0.5, 50, 50);
  		
-	    m_lightingShader->bind();
+	    //m_lightingShader->bind();
  		
         glBindTexture(GL_TEXTURE_2D, 0);
  		glTranslatef(0.8, 0.0, 0.0);
@@ -172,7 +196,7 @@ void GLEngine::drawScene()
  		gluSphere(sphere, 0.05, 50, 50);
  		glPopMatrix();
  		
- 		m_lightingShader->release();
+ 		//m_lightingShader->release();
  		
  		m_gRayFrameBuffer->release();
  		glBindTexture(GL_TEXTURE_2D, m_gRayFrameBuffer->texture());

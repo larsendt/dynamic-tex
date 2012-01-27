@@ -25,7 +25,8 @@ class GLEngine
 		sf::Window* m_window;
 		sf::Clock* m_clock;
 		Light* m_light;
-		Shader* m_texShader;
+		Shader* m_blueTexShader;
+		Shader* m_goldTexShader;
 		Shader* m_gRayShader;
 		Shader* m_lightingShader;
 		FrameBuffer* m_texFrameBuffer;
@@ -35,6 +36,7 @@ class GLEngine
 		bool m_fullScreen;
 		bool m_sphere;
 		bool m_godRays;
+		bool m_color;
 		GLuint m_texture;
 		int m_mouseLastX;
 		int m_mouseLastY;
