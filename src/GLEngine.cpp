@@ -11,6 +11,7 @@ GLEngine::GLEngine(int argc, char** argv)
 	m_sphere = true;
 	m_godRays = true;
 	m_color = true;
+	m_wrapTex = true;
 	m_updateRate = 1.0/60.0;
 	m_scale = 1.0;
 	initGL(argc, argv);
@@ -47,9 +48,11 @@ void GLEngine::initGL(int argc, char** argv)
 	m_goldTexShader = new Shader("shaders/warping.vert", "shaders/sphere_warping_gold.frag");
 	m_gRayShader = new Shader("shaders/god_rays.vert", "shaders/god_rays.frag");
 	m_lightingShader = new Shader("shaders/pixel_lighting.vert", "shaders/pixel_lighting.frag");
+	m_texWrappingShader = new Shader("shaders/wrap_texture.vert", "shaders/wrap_texture.frag");
 	
 	m_texFrameBuffer = new FrameBuffer(m_screenWidth, m_screenHeight);
 	m_gRayFrameBuffer = new FrameBuffer(m_screenWidth, m_screenHeight);
+	m_texWrappingFrameBuffer = new FrameBuffer(m_screenWidth, m_screenHeight);
 	
 	m_mouseRotX = 0;
 	m_mouseRotY = 0;
@@ -110,6 +113,9 @@ int GLEngine::begin()
                     case sf::Key::C:
                         m_color = !m_color;
                         break;
+                    case sf::Key::W:
+                        m_wrapTex = !m_wrapTex;
+                        break;
                     default:
                         break;
 			    }
@@ -168,17 +174,41 @@ void GLEngine::drawScene()
     m_texFrameBuffer->release();
     m_texture = m_texFrameBuffer->texture();
     
+    if(m_wrapTex)
+    {
+        m_texWrappingFrameBuffer->bind();
+        
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, m_texture);
+        m_texWrappingShader->bind();
+        m_texWrappingShader->setUniform1f("texture", 0);
+        
+        glColor3f(1.0, 1.0, 1.0);
+        glBegin(GL_POLYGON);
+        glTexCoord2f(0, 0); glVertex3f(-m_width, -1, 0);
+        glTexCoord2f(1, 0); glVertex3f(m_width, -1, 0);
+        glTexCoord2f(1, 1); glVertex3f(m_width, 1, 0);
+        glTexCoord2f(0, 1); glVertex3f(-m_width, 1, 0);
+        glEnd();
+        
+        m_texWrappingShader->release();
+        
+        m_texWrappingFrameBuffer->release();
+        
+        m_texture = m_texWrappingFrameBuffer->texture();
+    }
+    
     glBindTexture(GL_TEXTURE_2D, m_texture);	
-	
+        
 	if(m_sphere)
 	{
 	    m_gRayFrameBuffer->bind();
 	    
 	    glPushMatrix();
 	    
-	    m_light->enlighten();
-	    
 	    //glTranslatef(0.0, 0.0, -4.0);
+	    
+	    glDisable(GL_LIGHTING);
 	    
 	    glRotatef(m_mouseRotX, 1, 0, 0);
 	    glRotatef(m_mouseRotY, 0, 1, 0);
@@ -190,20 +220,22 @@ void GLEngine::drawScene()
 		glColor3f(1.0, 1.0, 1.0);
  		gluSphere(sphere, 0.5, 50, 50);
  		
-	    //m_lightingShader->bind();
+ 		glEnable(GL_LIGHTING);
  		
+	    m_light->enlighten();
         glBindTexture(GL_TEXTURE_2D, 0);
  		glTranslatef(0.8, 0.0, 0.0);
 		gluQuadricDrawStyle(sphere, GLU_FILL);
 		gluQuadricTexture(sphere, GL_FALSE);
 		gluQuadricNormals(sphere, GLU_SMOOTH);
-		glColor3f(0.05, 0.05, 0.05);
+		glColor3f(0.2, 0.2, 0.2);
  		gluSphere(sphere, 0.05, 50, 50);
  		glPopMatrix();
  		
- 		//m_lightingShader->release();
- 		
  		m_gRayFrameBuffer->release();
+ 		
+ 		
+	    glDisable(GL_LIGHTING);
  		glBindTexture(GL_TEXTURE_2D, m_gRayFrameBuffer->texture());
  		
  		if(m_godRays) m_gRayShader->bind();
@@ -218,6 +250,7 @@ void GLEngine::drawScene()
 	}
 	else 
 	{
+	    glDisable(GL_LIGHTING);
         glBegin(GL_POLYGON);
         glTexCoord2f(0, 0); glVertex3f(-m_width, -1, 0);
         glTexCoord2f(1, 0); glVertex3f(m_width, -1, 0);
@@ -269,6 +302,7 @@ void GLEngine::resize(int width, int height)
 	
 	m_texFrameBuffer->resize(width, height);
 	m_gRayFrameBuffer->resize(width, height);
+	m_texWrappingFrameBuffer->resize(width, height);
 }
 
 

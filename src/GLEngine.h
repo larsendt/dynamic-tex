@@ -29,14 +29,17 @@ class GLEngine
 		Shader* m_goldTexShader;
 		Shader* m_gRayShader;
 		Shader* m_lightingShader;
+		Shader* m_texWrappingShader;
 		FrameBuffer* m_texFrameBuffer;
 		FrameBuffer* m_gRayFrameBuffer;
+		FrameBuffer* m_texWrappingFrameBuffer;
 		float m_updateRate;
 		float m_width;
 		bool m_fullScreen;
 		bool m_sphere;
 		bool m_godRays;
 		bool m_color;
+		bool m_wrapTex;
 		GLuint m_texture;
 		int m_mouseLastX;
 		int m_mouseLastY;
