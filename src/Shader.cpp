@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 
-Shader::Shader(char* vert_path, char* frag_path)
+Shader::Shader(const char* vert_path, const char* frag_path)
 {
     printf("Compiling vertex shader: %s\n", vert_path);
     GLuint vertex_handle = compileShader(GL_VERTEX_SHADER, vert_path);
@@ -25,49 +25,49 @@ void Shader::release()
     glUseProgram(0);
 }
 
-void Shader::setUniform1f(char* name, float value)
+void Shader::setUniform1f(const char* name, float value)
 {
     GLint loc = glGetUniformLocation(m_program, name);
     glUniform1f(loc, value);
 }
 
-void Shader::setUniform2f(char* name, float v1, float v2)
+void Shader::setUniform2f(const char* name, float v1, float v2)
 {
     GLint loc = glGetUniformLocation(m_program, name);
     glUniform2f(loc, v1, v2);
 }
 
-void Shader::setUniform3f(char* name, float v1, float v2, float v3)
+void Shader::setUniform3f(const char* name, float v1, float v2, float v3)
 {
     GLint loc = glGetUniformLocation(m_program, name);
     glUniform3f(loc, v1, v2, v3);
 }
 
-void Shader::setUniform4f(char* name, float v1, float v2, float v3, float v4)
+void Shader::setUniform4f(const char* name, float v1, float v2, float v3, float v4)
 {
     GLint loc = glGetUniformLocation(m_program, name);
     glUniform4f(loc, v1, v2, v3, v4);
 }
 
-void Shader::setUniform1i(char* name, int value)
+void Shader::setUniform1i(const char* name, int value)
 {
     GLint loc = glGetUniformLocation(m_program, name);
     glUniform1i(loc, value);
 }
 
-void Shader::setUniform2i(char* name, int v1, int v2)
+void Shader::setUniform2i(const char* name, int v1, int v2)
 {
     GLint loc = glGetUniformLocation(m_program, name);
     glUniform2i(loc, v1, v2);
 }
 
-void Shader::setUniform3i(char* name, int v1, int v2, int v3)
+void Shader::setUniform3i(const char* name, int v1, int v2, int v3)
 {
     GLint loc = glGetUniformLocation(m_program, name);
     glUniform3i(loc, v1, v2, v3);
 }
 
-void Shader::setUniform4i(char* name, int v1, int v2, int v3, int v4)
+void Shader::setUniform4i(const char* name, int v1, int v2, int v3, int v4)
 {
     GLint loc = glGetUniformLocation(m_program, name);
     glUniform4i(loc, v1, v2, v3, v4);
@@ -77,7 +77,7 @@ void Shader::setUniform4i(char* name, int v1, int v2, int v3, int v4)
 //               Protected
 //----------------------------------------
 
-GLuint Shader::compileShader(GLenum shader_type, char* file_path)
+GLuint Shader::compileShader(GLenum shader_type, const char* file_path)
 {
     std::string s = readFile(file_path);
     const char* shader_src = s.c_str();
@@ -99,7 +99,7 @@ GLuint Shader::linkProgram(GLuint vert_handle, GLuint frag_handle)
     return program;
 }
 
-void Shader::printShaderLog(GLuint shader, char* shader_file)
+void Shader::printShaderLog(GLuint shader, const char* shader_file)
 {
     char* text = new char[4096];
     int len;
@@ -114,7 +114,7 @@ void Shader::printShaderLog(GLuint shader, char* shader_file)
 
 void Shader::printProgramLog(GLuint program)
 {
-    char* text;
+    char* text = new char[4096];
     int len;
     
     glGetProgramInfoLog(program, 4096, &len, text);

@@ -1,11 +1,6 @@
 #ifndef GLENGINE_H
 #define GLENGINE_H
 
-#define USE_GLEW
-#ifdef USE_GLEW
-#include <GL/glew.h>
-#endif
-
 #include <SFML/Window.hpp>
 #include "Shader.h"
 #include "FrameBuffer.h"
@@ -25,21 +20,24 @@ class GLEngine
 		sf::Window* m_window;
 		sf::Clock* m_clock;
 		Light* m_light;
-		Shader* m_blueTexShader;
-		Shader* m_goldTexShader;
 		Shader* m_gRayShader;
-		Shader* m_lightingShader;
 		Shader* m_texWrappingShader;
+		Shader* m_equiWarpingShader;
+		Shader* m_currentColorShader;
+        std::vector<Shader*> m_colorShaders;
 		FrameBuffer* m_texFrameBuffer;
 		FrameBuffer* m_gRayFrameBuffer;
 		FrameBuffer* m_texWrappingFrameBuffer;
+		FrameBuffer* m_equiWarpingFrameBuffer;
 		float m_updateRate;
 		float m_width;
 		bool m_fullScreen;
 		bool m_sphere;
 		bool m_godRays;
-		bool m_color;
+		int m_shaderIndex;
 		bool m_wrapTex;
+		bool m_planet;
+		bool m_equiWarp;
 		GLuint m_texture;
 		int m_mouseLastX;
 		int m_mouseLastY;

@@ -4,16 +4,11 @@
 #include <stdlib.h>
 #include <math.h>
 
+#define NUM_COLORS 3
+
 GLEngine::GLEngine(int argc, char** argv)
 {
 	fprintf(stdout, "Initializing GLEngine\n");
-	m_fullScreen = false;
-	m_sphere = true;
-	m_godRays = true;
-	m_color = true;
-	m_wrapTex = true;
-	m_updateRate = 1.0/60.0;
-	m_scale = 1.0;
 	initGL(argc, argv);
 }
 
@@ -25,14 +20,6 @@ void GLEngine::initGL(int argc, char** argv)
     m_screenHeight = m_window->GetHeight();
 	m_clock = new sf::Clock();
 	
-#ifdef USE_GLEW
-    GLenum error = glewInit();
-    if(GLEW_OK != error)
-    {
-        fprintf(stderr, "Error: %s\n", glewGetErrorString(error));
-    }
-#endif
-
 	glClearColor(0.0, 0.0, 0.0, 1.0);
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_DEPTH_TEST);
@@ -41,18 +28,32 @@ void GLEngine::initGL(int argc, char** argv)
     glEnable(GL_LIGHTING);
     glEnable(GL_COLOR_MATERIAL);
     glEnable(GL_LIGHT0);
+    
+    m_fullScreen = false;
+	m_sphere = false;
+	m_godRays = false;
+	m_shaderIndex = 0;
+	m_wrapTex = false;
+	m_planet = false;
+	m_equiWarp = false;
+	m_updateRate = 1.0/60.0;
+	m_scale = 1.0;
 
     m_light = new Light();
 
-	m_blueTexShader = new Shader("shaders/warping.vert", "shaders/sphere_warping_blue.frag");
-	m_goldTexShader = new Shader("shaders/warping.vert", "shaders/sphere_warping_gold.frag");
 	m_gRayShader = new Shader("shaders/god_rays.vert", "shaders/god_rays.frag");
-	m_lightingShader = new Shader("shaders/pixel_lighting.vert", "shaders/pixel_lighting.frag");
 	m_texWrappingShader = new Shader("shaders/wrap_texture.vert", "shaders/wrap_texture.frag");
+	m_equiWarpingShader = new Shader("shaders/equirectangular_warping.vert", "shaders/equirectangular_warping.frag");
+	
+	m_colorShaders.push_back(new Shader("shaders/warping.vert", "shaders/warping_chaotic_blue.frag"));
+	m_colorShaders.push_back(new Shader("shaders/warping.vert", "shaders/warping_2pass_gold.frag"));
+	m_colorShaders.push_back(new Shader("shaders/warping.vert", "shaders/warping_chaotic_red.frag"));
+	m_currentColorShader = m_colorShaders[0];
 	
 	m_texFrameBuffer = new FrameBuffer(m_screenWidth, m_screenHeight);
 	m_gRayFrameBuffer = new FrameBuffer(m_screenWidth, m_screenHeight);
 	m_texWrappingFrameBuffer = new FrameBuffer(m_screenWidth, m_screenHeight);
+	m_equiWarpingFrameBuffer = new FrameBuffer(m_screenWidth, m_screenHeight);
 	
 	m_mouseRotX = 0;
 	m_mouseRotY = 0;
@@ -111,10 +112,21 @@ int GLEngine::begin()
                         m_godRays = !m_godRays;
                         break;
                     case sf::Key::C:
-                        m_color = !m_color;
+                        m_shaderIndex += 1;
+                        if(m_shaderIndex > NUM_COLORS-1)
+                        {
+                            m_shaderIndex = 0;
+                        }
+                        m_currentColorShader = m_colorShaders[m_shaderIndex];
                         break;
                     case sf::Key::W:
                         m_wrapTex = !m_wrapTex;
+                        break;
+                    case sf::Key::P:
+                        m_planet = !m_planet;
+                        break;
+                    case sf::Key::E:
+                        m_equiWarp = !m_equiWarp;
                         break;
                     default:
                         break;
@@ -141,20 +153,10 @@ void GLEngine::drawScene()
 	
 	m_texFrameBuffer->bind();
 	
-	if(m_color)
-	{
-        m_goldTexShader->bind();
-        m_goldTexShader->setUniform1f("screen", m_width);
-        m_goldTexShader->setUniform1f("time", m_time);
-    }
-    else
-    {
-        m_blueTexShader->bind();
-        m_blueTexShader->setUniform1f("screen", m_width);
-        m_blueTexShader->setUniform1f("time", m_time);
-    }
-        
-        
+    m_currentColorShader->bind();
+    m_currentColorShader->setUniform1f("screen", m_width);
+    m_currentColorShader->setUniform1f("time", m_time);
+    
     glBegin(GL_POLYGON);
     glVertex3f(-m_width, -1, 0);
     glVertex3f(m_width, -1, 0);
@@ -162,17 +164,32 @@ void GLEngine::drawScene()
     glVertex3f(-m_width, 1, 0);
     glEnd();
     
-    if(m_color)
-    {
-        m_goldTexShader->release();
-    }
-    else
-    {
-        m_blueTexShader->release();
-    }
-    
+    m_currentColorShader->release();
     m_texFrameBuffer->release();
     m_texture = m_texFrameBuffer->texture();
+    
+    if(m_equiWarp)
+    {
+        m_equiWarpingFrameBuffer->bind();
+        
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, m_texture);
+        m_equiWarpingShader->bind();
+        m_equiWarpingShader->setUniform1i("texture", 0);
+        m_equiWarpingShader->setUniform1f("screen", m_width);
+        
+        glColor3f(1.0, 1.0, 1.0);
+        glBegin(GL_POLYGON);
+        glTexCoord2f(0, 0); glVertex3f(-m_width, -1, 0);
+        glTexCoord2f(1, 0); glVertex3f(m_width, -1, 0);
+        glTexCoord2f(1, 1); glVertex3f(m_width, 1, 0);
+        glTexCoord2f(0, 1); glVertex3f(-m_width, 1, 0);
+        glEnd();
+        
+        m_equiWarpingShader->release();
+        m_equiWarpingFrameBuffer->release();
+        m_texture = m_equiWarpingFrameBuffer->texture();
+    }
     
     if(m_wrapTex)
     {
@@ -181,7 +198,7 @@ void GLEngine::drawScene()
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, m_texture);
         m_texWrappingShader->bind();
-        m_texWrappingShader->setUniform1f("texture", 0);
+        m_texWrappingShader->setUniform1i("texture", 0);
         
         glColor3f(1.0, 1.0, 1.0);
         glBegin(GL_POLYGON);
@@ -192,9 +209,7 @@ void GLEngine::drawScene()
         glEnd();
         
         m_texWrappingShader->release();
-        
         m_texWrappingFrameBuffer->release();
-        
         m_texture = m_texWrappingFrameBuffer->texture();
     }
     
@@ -222,16 +237,20 @@ void GLEngine::drawScene()
  		
  		glEnable(GL_LIGHTING);
  		
-	    m_light->enlighten();
-        glBindTexture(GL_TEXTURE_2D, 0);
- 		glTranslatef(0.8, 0.0, 0.0);
-		gluQuadricDrawStyle(sphere, GLU_FILL);
-		gluQuadricTexture(sphere, GL_FALSE);
-		gluQuadricNormals(sphere, GLU_SMOOTH);
-		glColor3f(0.2, 0.2, 0.2);
- 		gluSphere(sphere, 0.05, 50, 50);
- 		glPopMatrix();
+ 		if(m_planet)
+ 		{
+	        m_light->enlighten();
+            glBindTexture(GL_TEXTURE_2D, 0);
+     		glTranslatef(0.8, 0.0, 0.0);
+		    gluQuadricDrawStyle(sphere, GLU_FILL);
+		    gluQuadricTexture(sphere, GL_FALSE);
+		    gluQuadricNormals(sphere, GLU_SMOOTH);
+		    glColor3f(0.2, 0.2, 0.2);
+     		gluSphere(sphere, 0.05, 50, 50);
+ 		}
  		
+ 		glPopMatrix();
+     		
  		m_gRayFrameBuffer->release();
  		
  		
@@ -303,6 +322,7 @@ void GLEngine::resize(int width, int height)
 	m_texFrameBuffer->resize(width, height);
 	m_gRayFrameBuffer->resize(width, height);
 	m_texWrappingFrameBuffer->resize(width, height);
+	m_equiWarpingFrameBuffer->resize(width, height);
 }
 
 

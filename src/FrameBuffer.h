@@ -1,13 +1,10 @@
 #ifndef FRAME_BUFFER_H
 #define FRAME_BUFFER_H
 
-#define USE_GLEW
-#ifdef USE_GLEW
-#include <GL/glew.h>
-#endif
+#define GL_GLEXT_PROTOTYPES
 
 #include <GL/gl.h>
-#include <GL/glu.h>
+#include <GL/glext.h>
 
 class FrameBuffer
 {
