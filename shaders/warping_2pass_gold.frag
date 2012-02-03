@@ -125,7 +125,7 @@ float fbm(vec2 pos)
     float base = 0.75;
     float y = pos.y * base;
     float x = pos.x * base;
-    float n = 0.0 * snoise(vec3(x, y, t));
+    float n = 0.0; // * snoise(vec3(x, y, t));
     n += 0.5 * (snoise(vec3(2.0 * x, 2.0 * y, 1.4*t)));
     n += 0.25 * (snoise(vec3(4.0 * x, 4.0 * y, 2.4*t)));
     n += 0.125 * (snoise(vec3(8.0 * x, 8.0 * y, 3.4*t)));
@@ -156,7 +156,7 @@ vec4 getColor(vec2 p)
 void main()
 {   
     vec4 color = getColor(gl_TexCoord[0].xy);
-    gl_FragColor = vec4(color.r, color.g, color.b, 1.0);
+    gl_FragColor = vec4(color.rgb, 1.0);
 }
 
 

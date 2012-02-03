@@ -1,10 +1,12 @@
 #include "GLEngine.h"
 #include "Util.h"
+#include "Texture.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 
-#define NUM_COLORS 3
+#define NUM_COLORS 5
 
 GLEngine::GLEngine(int argc, char** argv)
 {
@@ -14,8 +16,8 @@ GLEngine::GLEngine(int argc, char** argv)
 
 void GLEngine::initGL(int argc, char** argv)
 {
-    m_window = new sf::Window(sf::VideoMode::GetDesktopMode(), "GLEngine", sf::Style::Fullscreen);
-    //m_window = new sf::Window(sf::VideoMode(1300, 700), "GLEngine", sf::Style::Resize | sf::Style::Close); 
+    //m_window = new sf::Window(sf::VideoMode::GetDesktopMode(), "GLEngine", sf::Style::Fullscreen);
+    m_window = new sf::Window(sf::VideoMode(1300, 700), "GLEngine", sf::Style::Resize | sf::Style::Close); 
     m_screenWidth = m_window->GetWidth();
     m_screenHeight = m_window->GetHeight();
 	m_clock = new sf::Clock();
@@ -30,12 +32,13 @@ void GLEngine::initGL(int argc, char** argv)
     glEnable(GL_LIGHT0);
     
     m_fullScreen = false;
-	m_sphere = false;
-	m_godRays = false;
+	m_sphere = true;
+	m_godRays = true;
 	m_shaderIndex = 0;
-	m_wrapTex = false;
+	m_wrapTex = true;
 	m_planet = false;
-	m_equiWarp = false;
+	m_equiWarp = true;
+	m_warpingEarth = false;
 	m_updateRate = 1.0/60.0;
 	m_scale = 1.0;
 
@@ -45,15 +48,20 @@ void GLEngine::initGL(int argc, char** argv)
 	m_texWrappingShader = new Shader("shaders/wrap_texture.vert", "shaders/wrap_texture.frag");
 	m_equiWarpingShader = new Shader("shaders/equirectangular_warping.vert", "shaders/equirectangular_warping.frag");
 	
+	m_colorShaders.push_back(new Shader("shaders/warping.vert", "shaders/warping_chaotic_red.frag"));
 	m_colorShaders.push_back(new Shader("shaders/warping.vert", "shaders/warping_nebulous.frag"));
 	m_colorShaders.push_back(new Shader("shaders/warping.vert", "shaders/warping_2pass_gold.frag"));
-	m_colorShaders.push_back(new Shader("shaders/warping.vert", "shaders/warping_chaotic_red.frag"));
+	m_earthTexShader = new Shader("shaders/tex_warping.vert", "shaders/warping_image.frag");
+	m_colorShaders.push_back(m_earthTexShader);
+	m_colorShaders.push_back(new Shader("shaders/warping.vert", "shaders/simple_fbm.frag"));
 	m_currentColorShader = m_colorShaders[0];
 	
 	m_texFrameBuffer = new FrameBuffer(m_screenWidth, m_screenHeight);
 	m_gRayFrameBuffer = new FrameBuffer(m_screenWidth, m_screenHeight);
 	m_texWrappingFrameBuffer = new FrameBuffer(m_screenWidth, m_screenHeight);
 	m_equiWarpingFrameBuffer = new FrameBuffer(m_screenWidth, m_screenHeight);
+	
+	m_earthTex = Texture::loadTexture("resources/earth.jpg");
 	
 	m_mouseRotX = 0;
 	m_mouseRotY = 0;
@@ -119,6 +127,14 @@ int GLEngine::begin()
                         }
                         m_currentColorShader = m_colorShaders[m_shaderIndex];
                         break;
+                    case sf::Key::X:
+                        m_shaderIndex -= 1;
+                        if(m_shaderIndex < 0)
+                        {
+                            m_shaderIndex = NUM_COLORS-1;
+                        }
+                        m_currentColorShader = m_colorShaders[m_shaderIndex];
+                        break;
                     case sf::Key::W:
                         m_wrapTex = !m_wrapTex;
                         break;
@@ -127,6 +143,9 @@ int GLEngine::begin()
                         break;
                     case sf::Key::E:
                         m_equiWarp = !m_equiWarp;
+                        break;
+                    case sf::Key::Z:
+                        m_warpingEarth = !m_warpingEarth;
                         break;
                     default:
                         break;
@@ -156,6 +175,14 @@ void GLEngine::drawScene()
     m_currentColorShader->bind();
     m_currentColorShader->setUniform1f("screen", m_width);
     m_currentColorShader->setUniform1f("time", m_time);
+    
+    if(m_currentColorShader == m_earthTexShader)
+    {  
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, m_earthTex);
+        m_currentColorShader->setUniform1i("texture", 0);
+        m_currentColorShader->setUniform1i("warpingEarth", m_warpingEarth);
+    }
     
     glBegin(GL_POLYGON);
     glVertex3f(-m_width, -1, 0);
@@ -233,9 +260,11 @@ void GLEngine::drawScene()
 		gluQuadricTexture(sphere, GL_TRUE);
 		gluQuadricNormals(sphere, GLU_SMOOTH);
 		glColor3f(1.0, 1.0, 1.0);
+		
+		glPushMatrix();
+		glRotatef(-90, 1.0, 0.0, 0.0); 
  		gluSphere(sphere, 0.5, 50, 50);
- 		
- 		glEnable(GL_LIGHTING);
+ 		glPopMatrix();
  		
  		if(m_planet)
  		{
@@ -250,11 +279,7 @@ void GLEngine::drawScene()
  		}
  		
  		glPopMatrix();
-     		
  		m_gRayFrameBuffer->release();
- 		
- 		
-	    glDisable(GL_LIGHTING);
  		glBindTexture(GL_TEXTURE_2D, m_gRayFrameBuffer->texture());
  		
  		if(m_godRays) m_gRayShader->bind();
@@ -285,7 +310,6 @@ void GLEngine::drawScene()
 void GLEngine::update()
 {
 	float time = m_clock->GetElapsedTime();
-    m_clock->Reset();
     float rot_speed = 0.05;
     float time_speed = 0.01;
     	
@@ -298,11 +322,13 @@ void GLEngine::update()
         float multiplier = time / m_updateRate;
         m_mouseRotY += rot_speed * multiplier;
         m_time += time_speed * multiplier;
+        m_clock->Reset();
     }
     else
     {	
         m_mouseRotY += rot_speed;
         m_time += time_speed;
+        m_clock->Reset();
     }
 }
 

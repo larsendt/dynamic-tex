@@ -24,6 +24,7 @@ class GLEngine
 		Shader* m_texWrappingShader;
 		Shader* m_equiWarpingShader;
 		Shader* m_currentColorShader;
+		Shader* m_earthTexShader;
         std::vector<Shader*> m_colorShaders;
 		FrameBuffer* m_texFrameBuffer;
 		FrameBuffer* m_gRayFrameBuffer;
@@ -34,11 +35,13 @@ class GLEngine
 		bool m_fullScreen;
 		bool m_sphere;
 		bool m_godRays;
+		bool m_warpingEarth;
 		int m_shaderIndex;
 		bool m_wrapTex;
 		bool m_planet;
 		bool m_equiWarp;
 		GLuint m_texture;
+		GLuint m_earthTex;
 		int m_mouseLastX;
 		int m_mouseLastY;
         float m_mouseRotX;
