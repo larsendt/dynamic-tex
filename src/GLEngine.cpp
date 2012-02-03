@@ -14,8 +14,8 @@ GLEngine::GLEngine(int argc, char** argv)
 
 void GLEngine::initGL(int argc, char** argv)
 {
-    //m_window = new sf::Window(sf::VideoMode::GetDesktopMode(), "GLEngine", sf::Style::Fullscreen);
-    m_window = new sf::Window(sf::VideoMode(1300, 700), "GLEngine", sf::Style::Resize | sf::Style::Close); 
+    m_window = new sf::Window(sf::VideoMode::GetDesktopMode(), "GLEngine", sf::Style::Fullscreen);
+    //m_window = new sf::Window(sf::VideoMode(1300, 700), "GLEngine", sf::Style::Resize | sf::Style::Close); 
     m_screenWidth = m_window->GetWidth();
     m_screenHeight = m_window->GetHeight();
 	m_clock = new sf::Clock();
@@ -45,7 +45,7 @@ void GLEngine::initGL(int argc, char** argv)
 	m_texWrappingShader = new Shader("shaders/wrap_texture.vert", "shaders/wrap_texture.frag");
 	m_equiWarpingShader = new Shader("shaders/equirectangular_warping.vert", "shaders/equirectangular_warping.frag");
 	
-	m_colorShaders.push_back(new Shader("shaders/warping.vert", "shaders/warping_chaotic_blue.frag"));
+	m_colorShaders.push_back(new Shader("shaders/warping.vert", "shaders/warping_nebulous.frag"));
 	m_colorShaders.push_back(new Shader("shaders/warping.vert", "shaders/warping_2pass_gold.frag"));
 	m_colorShaders.push_back(new Shader("shaders/warping.vert", "shaders/warping_chaotic_red.frag"));
 	m_currentColorShader = m_colorShaders[0];
