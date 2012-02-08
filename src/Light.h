@@ -9,6 +9,10 @@ class Light
     public:
         Light();
         void enlighten();
+        void setPos(float x, float y, float z);
+        void displaySphere(bool display_sphere);
+        bool displayingSphere() { return m_displayingSphere; }
+        float* modelViewMatrix() { return m_modelView; }
    
     private:
         float m_x;
@@ -17,6 +21,8 @@ class Light
         float m_diffuse;
         float m_specular;
         float m_ambient;
+        bool m_displayingSphere;        
+        float* m_modelView;
 };
 
 #endif

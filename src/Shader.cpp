@@ -73,6 +73,12 @@ void Shader::setUniform4i(const char* name, int v1, int v2, int v3, int v4)
     glUniform4i(loc, v1, v2, v3, v4);
 }
 
+void Shader::setUniformMatrix4fv(const char* name, float* value)
+{
+    GLint loc = glGetUniformLocation(m_program, name);
+    glUniformMatrix4fv(loc, 1, false, value);
+}
+
 //----------------------------------------
 //               Protected
 //----------------------------------------

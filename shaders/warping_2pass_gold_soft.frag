@@ -118,8 +118,6 @@ float snoise(vec3 v)
 ///////////////////////////////////////
 
 uniform float time;
-uniform sampler2D texture;
-uniform bool warpingEarth;
 
 float fbm(vec2 pos)
 {
@@ -127,7 +125,7 @@ float fbm(vec2 pos)
     float base = 0.75;
     float y = pos.y * base;
     float x = pos.x * base;
-    float n = 1.0 * snoise(vec3(x, y, t));
+    float n = 0.0; // * snoise(vec3(x, y, t));
     n += 0.5 * (snoise(vec3(2.0 * x, 2.0 * y, 1.4*t)));
     n += 0.25 * (snoise(vec3(4.0 * x, 4.0 * y, 2.4*t)));
     n += 0.125 * (snoise(vec3(8.0 * x, 8.0 * y, 3.4*t)));
@@ -139,22 +137,29 @@ float fbm(vec2 pos)
 
 vec4 getColor(vec2 p)
 {
-    if(warpingEarth)
-    {  
-        float pval = fbm(p);
-	    vec2 q = vec2(pval, pval);
-	    return texture2D(texture, p+(q/4.0)-0.1);
-    }
-    else
-    {
-        return texture2D(texture, p);
-    }
+    float pval = fbm(p);
+	vec2 q = vec2(pval);
+	
+	float qval = fbm(p + q);
+	vec2 r = vec2(qval);
+	float n = fbm(p + r);
+	
+	vec4 color1 = vec4(1.0, 1.0, 1.0, 1.0);
+	vec4 color2 = vec4(1.0, 0.4, 0.0, 1.0);
+	vec4 color3 = vec4(1.0, 1.0, 1.0, 1.0);
+	
+	vec4 pcolor = color1*7.0;
+	
+	vec4 qcolor = mix(color2, pcolor, q.x*q.y*1.0); 
+	vec4 rcolor = mix(color3, qcolor, r.x*r.y*12.0); 
+	
+	return rcolor * n;
 }
 
 void main()
 {   
     vec4 color = getColor(gl_TexCoord[0].xy);
-    gl_FragColor = vec4(color.r, color.g, color.b, 1.0);
+    gl_FragColor = vec4(color.rgb, 1.0);
 }
 
 

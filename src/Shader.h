@@ -23,6 +23,8 @@ class Shader
         void setUniform2i(const char* name, int v1, int v2);
         void setUniform3i(const char* name, int v1, int v2, int v3);
         void setUniform4i(const char* name, int v1, int v2, int v3, int v4);
+        
+        void setUniformMatrix4fv(const char* name, float* value);
 
     protected:
         GLuint compileShader(GLenum shader_type, const char* file_path);

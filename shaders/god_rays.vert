@@ -6,6 +6,5 @@ void main()
 {
 	gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
 	gl_TexCoord[0] = gl_MultiTexCoord0;
-	light_pos = vec2(gl_ProjectionMatrix * light_modelview * light_coords) * 0.5 + 0.5;
-	//light_pos = light_ndc.xy * 0.5 + 0.5;
+    light_pos = vec2(light_modelview * gl_ProjectionMatrix * light_coords) * 0.5 + 0.5;
 }

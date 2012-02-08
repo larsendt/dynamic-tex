@@ -137,9 +137,12 @@ float fbm(vec2 pos)
 
 vec4 getColor(vec2 p)
 {
-	vec2 q = vec2(fbm(p + vec2(0.0, 0.0)), fbm(p + vec2(5.2, 1.3)));
-	vec2 r = vec2(fbm(p + 4.0*q + vec2(1.7, 9.2)), fbm(p + 4.0*q + vec2(8.3, 2.8)));
-	float n = fbm(p + 4.0*r);
+    float pval = fbm(p);
+	vec2 q = vec2(pval);
+	
+	float qval = fbm(p + (4.0*q));
+	vec2 r = vec2(qval);
+	float n = fbm(p + (4.0*r));
 	
 	vec4 color1 = vec4(1.0, 1.0, 1.0, 1.0);
 	vec4 color2 = vec4(1.0, 0.4, 0.0, 1.0);

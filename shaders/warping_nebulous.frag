@@ -138,11 +138,11 @@ float fbm(vec2 pos)
 vec4 getColor(vec2 p)
 {
     float v = fbm(p);
-	vec2 q = vec2(v, v);
+	vec2 q = vec2(v);
 	float n = fbm(p + q);
 	
 	vec4 color1 = vec4(1.0, 1.0, 1.0, 1.0);
-	vec4 color2 = vec4(0.7, 0.3, 0.7, 1.0);
+	vec4 color2 = vec4(0.3, 0.6, 0.6, 1.0);
 	vec4 pcolor = color1*7.0;
 	vec4 qcolor = mix(color2, pcolor, q.x*q.y); 
 	
@@ -151,7 +151,9 @@ vec4 getColor(vec2 p)
 
 void main()
 {   
-    vec4 color = getColor(gl_TexCoord[0].xy);
+    vec2 p = gl_TexCoord[0].xy;
+    p.x /= 6.0;
+    vec4 color = getColor(p);
     gl_FragColor = vec4(color.rgb, 1.0);
 }
 
