@@ -8,6 +8,8 @@ DEPENDPATH += . src
 INCLUDEPATH += .
 CONFIG -= qt
 CONFIG += debug
+CFLAGS += -Wall -Wextra
+CXXFLAGS += -Wall -Wextra
 unix:LIBS += -lsfml-graphics -lsfml-audio -lsfml-window -lsfml-system -lGLU
 
 OBJECTS_DIR = obj
