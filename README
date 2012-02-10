@@ -1,1 +1,41 @@
-A simple wrapper for OpenGL Shaders
+Advanced Graphics HW #3
+Dane Larsen
+
+Depends on: libsfml-dev and qmake
+
+Controls:
+	Click and drag to rotate the scene
+	Mouse wheel zooms
+	'ESC' - quit
+	'C' - go forward one texture shader
+	'X' - go back one texture shader
+	'G' - toggle god-rays
+	'E' - toggle equirectangular warping
+	'W' - toggle horizontal texture wrapping
+	'Z' - if the current shader is the "earth" shader, toggle warping on that shader
+	'S' - view the texture being applied to the sphere
+	'P' - toggle the planet
+	'L' - toggle the visibility of the external light (only has effect when god-rays are off)
+	
+The "earth" shader is used to demonstrate the effects of warping 
+(used in all the texture shaders except the gray one).
+
+The "plain gray cloudy" shader is a visualization of the 
+Fractional Brownian Motion used to warp the textures. 
+It's also used as a base for the more abstract textures.
+
+Toggling equirectangular warping and horizontal wrapping will 
+affect the texture displayed with the key "S". This is used to 
+demonstrate how to wrap a rectangular texture around a sphere.
+
+I tried to apply the god-rays shader to the external light 
+that is visible when god-rays are off. Unfortunately that 
+shader needs work. It applies to everything in the scene, so 
+anything that was lighter than the background (everything) 
+was being smeared, and it looked... weird. Also, I'm not 
+calculating the position of the light source correctly in 
+the vertex shader. It works fine if the source of the rays 
+is at (0, 0, 0), but anywhere else produces strange results.
+
+The god-rays shader might make an (improved) appearance in later
+assignments, but I don't have time to fix it right now.
