@@ -3,6 +3,9 @@ Dane Larsen
 
 Depends on: libsfml-dev and qmake
 
+Relevant links: GLSL Warping demo based on this: http://www.iquilezles.org/www/articles/warp/warp.htm
+  				Perlin/Simplex noise courtesy of https://github.com/ashima/webgl-noise
+
 Controls:
 	Click and drag to rotate the scene
 	Mouse wheel zooms
