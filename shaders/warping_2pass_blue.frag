@@ -120,11 +120,10 @@ float fbm(vec2 pos)
 	float t = time / 40.0;
 	float base = 0.75;
 	float n = 0.0 * snoise(vec3(base * pos.x, base * pos.y, t));
-	n += 0.5 * (snoise(vec3(2.0 * base * pos.x, 2.0 * base * pos.y, 1.4*t)));
-	n += 0.25 * (snoise(vec3(4.0 * base * pos.x, 4.0 * base * pos.y, 2.4*t)));
-    n += 0.125 * (snoise(vec3(8.0 * base * pos.x, 8.0 * base * pos.y, 3.4*t)));
-    n += 0.0625 * (snoise(vec3(16.0 * base * pos.x, 16.0 * base * pos.y, 4.4*t)));
-	n += 0.03125 * (snoise(vec3(32.0 * base * pos.x, 32.0 * base * pos.y, 5.4*t)));
+	n += 0.5 * (snoise(vec3(2.0 * base * pos.x, 2.0 * base * pos.y, 0.1*t)));
+	n += 0.25 * (snoise(vec3(4.0 * base * pos.x, 4.0 * base * pos.y, 2.0*t)));
+    n += 0.125 * (snoise(vec3(8.0 * base * pos.x, 8.0 * base * pos.y, 3.0*t)));
+    n += 0.0625 * (snoise(vec3(8.0 * base * pos.x, 16.0 * base * pos.y, 4.0*t)));
 	n = (n + 1.0) / 2.0;
 	return n * 0.7;
 }
@@ -137,7 +136,7 @@ void main()
 	float n = fbm(p + 4.0*r);
 	
 	vec4 color1 = vec4(1.0, 1.0, 1.0, 1.0);
-	vec4 color2 = vec4(0.8, 0.8, 1.0, 1.0);
+	vec4 color2 = vec4(0.5, 0.5, 0.7, 1.0);
 	vec4 color3 = vec4(1.0, 1.0, 1.0, 1.0);
 	
 	vec4 pcolor = color1*4.0;
