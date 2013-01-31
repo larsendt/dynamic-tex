@@ -25,6 +25,8 @@ class FrameBuffer
         GLuint m_frameBuffer;
         int m_width;
         int m_height;
+        int m_savedWidth;
+        int m_savedHeight;
 };
 
 #endif

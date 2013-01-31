@@ -136,7 +136,7 @@ void main()
 	float n = fbm(p + 4.0*r);
 	
 	vec4 color1 = vec4(1.0, 1.0, 1.0, 1.0);
-	vec4 color2 = vec4(0.5, 0.5, 0.7, 1.0);
+	vec4 color2 = vec4(0.5, 0.6, 0.7, 1.0);
 	vec4 color3 = vec4(1.0, 1.0, 1.0, 1.0);
 	
 	vec4 pcolor = color1*4.0;

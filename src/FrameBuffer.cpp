@@ -10,6 +10,13 @@ FrameBuffer::FrameBuffer(int width, int height)
 
 void FrameBuffer::bind()
 {
+    int vport[4];
+    glGetIntegerv(GL_VIEWPORT, vport);
+    m_savedWidth = vport[2];
+    m_savedHeight = vport[3];
+
+    glViewport(0, 0, m_width, m_height);
+
     glBindFramebuffer(GL_FRAMEBUFFER, m_frameBuffer);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
@@ -17,6 +24,7 @@ void FrameBuffer::bind()
 void FrameBuffer::release()
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0, 0, m_savedWidth, m_savedHeight);
 }
 
 void FrameBuffer::resize(int width, int height)

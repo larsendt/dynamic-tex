@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-#define NUM_COLORS 6
+#define FRAMEBUFFER_DIM 1024
 
 GLEngine::GLEngine(int argc, char** argv)
 {
@@ -47,23 +47,20 @@ void GLEngine::initGL(int argc, char** argv)
 	m_texWrappingShader = new Shader("shaders/wrap_texture.vert", "shaders/wrap_texture.frag");
 	m_equiWarpingShader = new Shader("shaders/equirectangular_warping.vert", "shaders/equirectangular_warping.frag");
 	
-	m_colorShaders.push_back(new Shader("shaders/warping.vert", "shaders/warping_chaotic_red.frag"));
+    m_colorShaders.push_back(new Shader("shaders/warping.vert", "shaders/darkblue.frag"));
+	m_colorShaders.push_back(new Shader("shaders/warping.vert", "shaders/chaotic1.frag"));
+	m_colorShaders.push_back(new Shader("shaders/warping.vert", "shaders/chaotic2.frag"));
+	m_colorShaders.push_back(new Shader("shaders/warping.vert", "shaders/chaotic3.frag"));
 	m_colorShaders.push_back(new Shader("shaders/warping.vert", "shaders/warping_nebulous.frag"));
 	m_colorShaders.push_back(new Shader("shaders/warping.vert", "shaders/warping_2pass_gold_soft.frag"));
 	m_colorShaders.push_back(new Shader("shaders/warping.vert", "shaders/warping_2pass_gold.frag"));
-    m_colorShaders.push_back(new Shader("shaders/warping.vert", "shaders/warping_2pass_blue.frag"));
-	m_earthTexShader = new Shader("shaders/tex_warping.vert", "shaders/warping_image.frag");
-	m_colorShaders.push_back(m_earthTexShader);
-	m_colorShaders.push_back(new Shader("shaders/warping.vert", "shaders/simple_fbm.frag"));
 	m_currentColorShader = m_colorShaders[0];
 	
 	m_texFrameBuffer = new FrameBuffer(m_screenWidth, m_screenHeight);
 	m_gRayFrameBuffer = new FrameBuffer(m_screenWidth, m_screenHeight);
 	m_texWrappingFrameBuffer = new FrameBuffer(m_screenWidth, m_screenHeight);
 	m_equiWarpingFrameBuffer = new FrameBuffer(m_screenWidth, m_screenHeight);
-	
-	m_earthTex = Texture::loadTexture("resources/earth.jpg");
-	
+
 	m_mouseRotX = 2;
 	m_mouseRotY = -120;
 	m_mouseLastX = 0;
@@ -134,7 +131,7 @@ int GLEngine::begin()
                         break;
                     case sf::Key::C:
                         m_shaderIndex += 1;
-                        if(m_shaderIndex > NUM_COLORS-1)
+                        if(m_shaderIndex > m_colorShaders.size()-1)
                         {
                             m_shaderIndex = 0;
                         }
@@ -144,7 +141,7 @@ int GLEngine::begin()
                         m_shaderIndex -= 1;
                         if(m_shaderIndex < 0)
                         {
-                            m_shaderIndex = NUM_COLORS-1;
+                            m_shaderIndex = m_colorShaders.size()-1;
                         }
                         m_currentColorShader = m_colorShaders[m_shaderIndex];
                         break;
@@ -156,9 +153,6 @@ int GLEngine::begin()
                         break;
                     case sf::Key::E:
                         m_equiWarp = !m_equiWarp;
-                        break;
-                    case sf::Key::Z:
-                        m_warpingEarth = !m_warpingEarth;
                         break;
                     case sf::Key::L:
                         m_light->displaySphere(!m_light->displayingSphere());
@@ -191,14 +185,6 @@ void GLEngine::drawScene()
     m_currentColorShader->bind();
     m_currentColorShader->setUniform1f("screen", m_width);
     m_currentColorShader->setUniform1f("time", m_time);
-    
-    if(m_currentColorShader == m_earthTexShader)
-    {  
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, m_earthTex);
-        m_currentColorShader->setUniform1i("texture", 0);
-        m_currentColorShader->setUniform1i("warpingEarth", m_warpingEarth);
-    }
     
     glBegin(GL_POLYGON);
     glVertex3f(-m_width, -1, 0);
@@ -392,8 +378,8 @@ void GLEngine::resize(int width, int height)
 	glViewport(0, 0, width, height);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	//gluPerspective(45, m_width, 0.5, 20.0);
-	glOrtho(-m_width, m_width, -1.0, 1.0, -10.0, 10.0);
+	gluPerspective(45, m_width, 0.5, 20.0);
+	//glOrtho(-m_width, m_width, -1.0, 1.0, -10.0, 10.0);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	
