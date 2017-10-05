@@ -2,6 +2,7 @@
 #define TEXTURE_H
 
 #include <SFML/Graphics.hpp>
+#include <SFML/OpenGL.hpp>
 
 class Texture
 {
